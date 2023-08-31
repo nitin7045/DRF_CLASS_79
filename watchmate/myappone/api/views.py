@@ -8,7 +8,7 @@ from myappone.api.serializers import MovieSerializer
 # by default: set for 'GET' request
 # 'many=True' is used because of extracting more than one object
 
-@api_view('GET','POST')                                                 
+@api_view(['GET','POST'])                                                 
 def movie_list(request):
     if request.method == 'GET':
         movies = Movie.objects.all()
@@ -26,8 +26,21 @@ def movie_list(request):
 # ---------------------------------------------------------------------------------------------------------------------
 # by default: set for 'GET' request
 
-@api_view()                                                 
+@api_view(['GET', 'PUT', 'DELETE'])                                                 
 def movie_details(request, pk):
-    movie = Movie.objects.get(pk=pk)
-    serializer = MovieSerializer(movie)
-    return Response(serializer.data)
+    if request.method == 'GET':
+        movie = Movie.objects.get(pk=pk)
+        serializer = MovieSerializer(movie, data=request.data)
+        return Response(serializer.data)
+
+    if request.method == 'PUT':
+        movie = Movie.objects.get(pk=pk)
+        serializer = MovieSerializer(movie, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
+
+    if request.method == 'DELETE':
+        pass
