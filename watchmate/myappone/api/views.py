@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from myappone.models import Movie
 from myappone.api.serializers import MovieSerializer
+from rest_framework import status
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -30,6 +31,10 @@ def movie_list(request):
 def movie_details(request, pk):
     if request.method == 'GET':
         movie = Movie.objects.get(pk=pk)
+        try:
+            movie = Movie.objects.get(pk=pk)
+        except Movie.DoesNotExist:
+            return Response({'error': 'Movie not found'}, status=status.HTTP_404_NOT_FOUND)
         serializer = MovieSerializer(movie, data=request.data)
         return Response(serializer.data)
 
@@ -43,4 +48,6 @@ def movie_details(request, pk):
             return Response(serializer.errors)
 
     if request.method == 'DELETE':
-        pass
+        movie = Movie.objects.get(pk=pk)
+        movie.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
